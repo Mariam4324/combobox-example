@@ -1,10 +1,18 @@
 import { useComboBoxState, Item } from "react-stately";
-import { useComboBox, useFilter, usePopover } from "react-aria";
+import {
+  useComboBox,
+  useFilter,
+  usePopover,
+  type AriaComboBoxProps,
+} from "react-aria";
 import { useRef } from "react";
 
-function ComboBox(props) {
-  // Get a basic "contains" filter function for input value
-  // and option text comparison
+type Option = {
+  id: number;
+  name: string;
+};
+
+function ComboBox(props: AriaComboBoxProps<Option>) {
   const { contains } = useFilter({ sensitivity: "base" });
   const state = useComboBoxState({
     ...props,
@@ -71,35 +79,17 @@ function ComboBox(props) {
             overflow: "auto",
           }}
         >
-          <ListBox {...listBoxProps} listBoxRef={listBoxRef} state={state} />
+          <ul
+            {...(listBoxProps as React.HTMLAttributes<HTMLUListElement>)}
+            ref={listBoxRef}
+          >
+            {[...state.collection].map((item) => (
+              <li key={item.key}>{item.rendered}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
-  );
-}
-
-function ListBox({ state, ...otherProps }) {
-  return (
-    <ul
-      {...otherProps}
-      style={{
-        margin: "0",
-        padding: "4px",
-        listStyle: "none",
-      }}
-    >
-      {[...state.collection].map((item) => (
-        <li
-          key={item.key}
-          style={{
-            padding: "8px",
-            cursor: "pointer",
-          }}
-        >
-          {item.rendered}
-        </li>
-      ))}
-    </ul>
   );
 }
 
@@ -116,7 +106,11 @@ export function App() {
           { id: 5, name: "Option 5" },
         ]}
       >
-        {(item) => <Item key={item.id}>{item.name}</Item>}
+        {(item: Option) => (
+          <Item key={item.id} textValue={item.name}>
+            {item.name}
+          </Item>
+        )}
       </ComboBox>
     </div>
   );
